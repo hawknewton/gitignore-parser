@@ -16,11 +16,9 @@ class Gitignore::Parser::Scanner
       end
     end.compact.flatten
 
-    (files.select { |f| !File.directory?(f) } - kept).each do |filtered|
-      kept << filtered if unignore?(filtered)
+    kept + (files.reject { |f| File.directory?(f) } - kept).select do |filtered|
+      unignored?(filtered)
     end
- 
-    kept
   end
 
   private
@@ -28,13 +26,13 @@ class Gitignore::Parser::Scanner
   attr_reader :directory, :parent_patterns
 
   def list_directory(dir)
-    return [] if ignore?("#{dir}/")
+    return [] if ignored?("#{dir}/")
     dir_rules = rules_for_subdir(dir)
     Gitignore::Parser::Scanner.new(directory: dir, filename: filename, parent_patterns: dir_rules).list_files
   end
 
   def list_file(file)
-    return [] if ignore?(file)
+    return [] if ignored?(file)
     [file]
   end
 
@@ -52,12 +50,10 @@ class Gitignore::Parser::Scanner
     end
   end
 
-  def ignore?(path)
-    rules.detect { |r| r.ignore?(relative_path(path)) }
-  end
-
-  def unignore?(path)
-    rules.detect { |r| r.unignore?(relative_path(path)) }
+  %i[ignore unignore].each do |name|
+    define_method("#{name}d?") do |path|
+      rules.detect { |r| r.send("#{name}?", relative_path(path)) }
+    end
   end
 
   def patterns

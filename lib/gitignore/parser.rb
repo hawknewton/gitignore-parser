@@ -3,4 +3,7 @@ require 'gitignore/parser/version'
 require 'gitignore/parser/rule'
 
 module Gitignore::Parser
+  def self.list_files(opts)
+    Gitignore::Parser::Scanner.new(opts).list_files
+  end
 end

@@ -51,5 +51,4 @@ class Gitignore::Parser::Rule
     pattern
   end
   # rubocop:enable Metrics/CyclomaticComplexity
-
 end

@@ -62,4 +62,16 @@ RSpec.describe Gitignore::Parser::Scanner do
       end
     end
   end
+
+  context 'given a directory with unignored entries' do
+    let(:directory) { 'spec/data/unignore' }
+    it 'returns unignored files' do
+      expect(result).to match_array([
+        'spec/data/unignore/keep',
+        'spec/data/unignore/keep.txt',
+        'spec/data/unignore/subdir/keep',
+        'spec/data/unignore/subdir/keep_too'
+      ])
+    end
+  end
 end

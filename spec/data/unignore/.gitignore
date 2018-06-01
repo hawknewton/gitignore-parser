@@ -1,0 +1,5 @@
+drop
+*.txt
+!/keep.txt
+!keep
+!subdir/keep_too

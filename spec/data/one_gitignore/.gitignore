@@ -1,0 +1,8 @@
+#
+# Comment
+drop
+nested_drop/**/bye_now
+/one_level
+/keep/not_so_much
+
+

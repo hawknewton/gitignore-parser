@@ -7,14 +7,10 @@ class Gitignore::Parser::Scanner
 
   def list_files
     files.map do |file|
-      relative = file[directory.length + 1..-1]
       if File.directory?(file)
-        next if ignored?("#{relative}/")
-        dir_rules = rules_for_dir(relative)
-        Gitignore::Parser::Scanner.new(directory: file, filename: filename, parent_rules: dir_rules).list_files
+        list_directory(file)
       else
-        next if ignored?(relative)
-        [file]
+        list_file(file)
       end
     end.compact.flatten
   end
@@ -22,6 +18,17 @@ class Gitignore::Parser::Scanner
   private
 
   attr_reader :directory, :parent_rules
+
+  def list_directory(dir)
+    return [] if ignored?("#{dir}/")
+    dir_rules = rules_for_subdir(dir)
+    Gitignore::Parser::Scanner.new(directory: dir, filename: filename, parent_rules: dir_rules).list_files
+  end
+
+  def list_file(file)
+    return [] if ignored?(file)
+    [file]
+  end
 
   def files
     @files ||= Dir["#{directory}/*"]
@@ -43,15 +50,19 @@ class Gitignore::Parser::Scanner
   end
 
   def ignored?(path)
-    rules.detect { |r| r.matches?(path) }
+    rules.detect { |r| r.matches?(relative_path(path)) }
+  end
+
+  def relative_path(path)
+    path[directory.length + 1..-1]
   end
 
   def rules
     @rules ||= parse_rules + parent_rules
   end
 
-  def rules_for_dir(dir)
-    patterns = rules.map { |r| r.for_dir(dir) }.compact
+  def rules_for_subdir(path)
+    patterns = rules.map { |r| r.for_dir(relative_path(path)) }.compact
     patterns.map { |p| Gitignore::Parser::Rule.new(p) }
   end
 end

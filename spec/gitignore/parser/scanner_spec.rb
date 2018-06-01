@@ -1,6 +1,6 @@
 RSpec.describe Gitignore::Parser::Scanner do
   subject(:result) do
-    described_class.new(opts).list_files(directory)
+    described_class.new(opts.merge(directory: directory)).list_files
   end
   let(:opts) { { } }
 

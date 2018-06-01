@@ -1,21 +1,19 @@
 class Gitignore::Parser::Scanner
   def initialize(opts)
+    @directory = opts[:directory]
     @filename = opts[:filename]
+    @parent_rules = opts[:parent_rules] || []
   end
 
-  def list_files(dir, parent_rules = [])
-    rules = get_rules_for(dir) + parent_rules
-
-    files = Dir["#{dir}/*"]
-
+  def list_files
     files.map do |file|
-      relative = file[dir.length + 1..-1]
+      relative = file[directory.length + 1..-1]
       if File.directory?(file)
-        next if rules.detect { |r| r.matches?("#{relative}/") }
-        dir_rules = rules_for_dir(relative, rules)
-        list_files(file, dir_rules)
+        next if ignored?("#{relative}/")
+        dir_rules = rules_for_dir(relative)
+        Gitignore::Parser::Scanner.new(directory: file, filename: filename, parent_rules: dir_rules).list_files
       else
-        next if rules.detect { |r| r.matches?(relative) }
+        next if ignored?(relative)
         [file]
       end
     end.compact.flatten
@@ -23,12 +21,18 @@ class Gitignore::Parser::Scanner
 
   private
 
+  attr_reader :directory, :parent_rules
+
+  def files
+    @files ||= Dir["#{directory}/*"]
+  end
+
   def filename
     @filename || '.gitignore'
   end
 
-  def get_rules_for(dir)
-    gitignore = File.join(dir, filename)
+  def parse_rules
+    gitignore = File.join(directory, filename)
     return [] if Dir[gitignore].empty?
 
     rules = []
@@ -38,7 +42,15 @@ class Gitignore::Parser::Scanner
     rules
   end
 
-  def rules_for_dir(dir, rules)
+  def ignored?(path)
+    rules.detect { |r| r.matches?(path) }
+  end
+
+  def rules
+    @rules ||= parse_rules + parent_rules
+  end
+
+  def rules_for_dir(dir)
     patterns = rules.map { |r| r.for_dir(dir) }.compact
     patterns.map { |p| Gitignore::Parser::Rule.new(p) }
   end

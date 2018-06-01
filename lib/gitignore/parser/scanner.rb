@@ -1,5 +1,3 @@
-require 'awesome_print'
-
 class Gitignore::Parser::Scanner
   def initialize(opts)
     @directory = opts[:directory]

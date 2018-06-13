@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    gitignore-parser (0.1.1)
+    gitignore-parser (0.1.2)
 
 GEM
   remote: https://rubygems.org/

@@ -1,4 +1,5 @@
 module Gitignore; end
+module Gitignore::Parser; end
 
 require 'gitignore/parser/scanner'
 require 'gitignore/parser/version'

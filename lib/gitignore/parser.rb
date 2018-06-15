@@ -1,8 +1,8 @@
+module Gitignore; end
+
 require 'gitignore/parser/scanner'
 require 'gitignore/parser/version'
 require 'gitignore/parser/rule'
-
-module Gitignore; end
 
 module Gitignore::Parser
   def self.list_files(opts = {})

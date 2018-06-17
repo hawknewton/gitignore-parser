@@ -35,7 +35,7 @@ class Gitignore::Parser::Scanner
   end
 
   def files
-    @files ||= Dir.glob("#{directory}/*", File::FNM_DOTMATCH).tap { |a| a.shift(2) }
+    @files ||= Dir.glob("#{directory}/*", File::FNM_DOTMATCH).reject { |f| f =~ /\/\.\.?$/ }
   end
 
   def filename
